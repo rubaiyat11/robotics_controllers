@@ -24,7 +24,7 @@ class PidControllerPyNode(Node):
         self.v_y = 0.0
         self.radius = 5.0
         self.target_position = np.array([0.0, 0.0, 0.0])
-        self.target_velocity = np.array([0.0, 0.0, 0.0s])
+        self.target_velocity = np.array([0.0, 0.0, 0.0])
 
         self.kp = np.array([2.0, 2.0, 2.0])
         self.ki = np.array([0.5, 0.5, 1.0])
@@ -61,8 +61,8 @@ class PidControllerPyNode(Node):
         self.v_x = -self.radius * self.omega * np.sin(self.time * self.omega)
         self.v_y = self.radius * self.omega * np.cos(self.time * self.omega)
 
-        self.target_position = [self.x, self.y, 0.0]
-        self.target_velocity = [self.v_x, self.v_y, 0.0]
+        self.target_position = np.array([self.x, self.y, 0.0])
+        self.target_velocity = np.array([self.v_x, self.v_y, 0.0])
 
         self.error = self.target_position - self.position
         self.velocity_error = self.target_velocity - self.velocity
@@ -76,7 +76,7 @@ class PidControllerPyNode(Node):
             self.integral = self.unit_vector * self.max_integral
 
 
-        self.derivative = self.velocity_error / self.dt
+        self.derivative = self.velocity_error
 
         self.force = self.error * self.kp + self.integral * self.ki + self.derivative * self.kd
 
