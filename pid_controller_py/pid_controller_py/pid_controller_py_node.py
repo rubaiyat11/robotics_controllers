@@ -13,7 +13,7 @@ class PidControllerPyNode(Node):
         self.acceleration = np.array([0.0, 0.0, 0.0])
 
         self.force = np.array([0.0, 0.0, 0.0])
-        self.omega = 0.5
+        self.omega = 0.5                        #Angular velocity for circling target
 
         self.mass = 1.0
         self.dt = 0.01
@@ -31,7 +31,7 @@ class PidControllerPyNode(Node):
         self.kd = np.array([0.2, 0.2, 0.6])
 
         self.error = np.array([0.0, 0.0, 0.0])
-        self.velocity_error = np.array([0.0, 0.0, 0.0])
+        self.velocity_error = np.array([0.0, 0.0, 0.0])         #Desired Velocity 
         self.prev_error = np.array([0.0, 0.0, 0.0])
         self.prev_velocity = np.array([0.0, 0.0, 0.0])
         self.integral = np.array([0.0, 0.0, 0.0])
@@ -53,49 +53,53 @@ class PidControllerPyNode(Node):
 
 
     def timer_callback(self):
-        self.time += self.dt
+        self.time += self.dt        #Tracking total time passed
 
+        #X & Y axis positions of target
         self.x = np.cos(self.time * self.omega) * self.radius
         self.y = np.sin(self.time * self.omega) * self.radius
 
+        #Velocity of the target trajectory
         self.v_x = -self.radius * self.omega * np.sin(self.time * self.omega)
         self.v_y = self.radius * self.omega * np.cos(self.time * self.omega)
 
+        #Initializing the target
         self.target_position = np.array([self.x, self.y, 0.0])
-        self.target_velocity = np.array([self.v_x, self.v_y, 0.0])
+        self.target_velocity = np.array([self.v_x, self.v_y, 0.0])      #Target trajectory
 
+        #Calculating errors
         self.error = self.target_position - self.position
         self.velocity_error = self.target_velocity - self.velocity
 
 
-        self.integral += self.error * self.dt
+        self.integral += self.error * self.dt       #Calculates steady state error of velocity
 
-        if np.linalg.norm(self.integral) > self.max_integral:
+        if np.linalg.norm(self.integral) > self.max_integral:       #Antiwindup logic
             self.unit_vector = self.integral / np.linalg.norm(self.integral)
 
             self.integral = self.unit_vector * self.max_integral
 
 
-        self.derivative = self.velocity_error
+        self.derivative = self.velocity_error       #Uses desired velocity as the parameter
 
-        self.force = self.error * self.kp + self.integral * self.ki + self.derivative * self.kd
+        self.force = self.error * self.kp + self.integral * self.ki + self.derivative * self.kd     #Control ouput
 
-        if np.linalg.norm(self.force) > self.max_force:
+        if np.linalg.norm(self.force) > self.max_force:             #Clamping autuator force
             self.unit_vector = self.force / np.linalg.norm(self.force)
 
             self.force = self.unit_vector * self.max_force
 
-        self.force -= self.damping * self.velocity
+        self.force -= self.damping * self.velocity      #Dampings
 
-        self.gravity = self.mass * self.gravity_accel
+        self.gravity = self.mass * self.gravity_accel   #Gravity
 
-        self.force += self.gravity
+        self.force += self.gravity          #Resultant
 
         self.acceleration = self.force / self.mass
 
-        self.velocity += self.acceleration * self.dt
+        self.velocity += self.acceleration * self.dt    #Applied velocity
 
-        self.position += self.velocity * self.dt
+        self.position += self.velocity * self.dt        #Applied position change
 
 
         self.prev_error = self.error
