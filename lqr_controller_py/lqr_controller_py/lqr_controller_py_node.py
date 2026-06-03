@@ -9,38 +9,45 @@ class helix_pid_controller_py_node(Node):
     def __init__(self):
         super().__init__("helix_pid_controller_py_node")
 
-        self.position = 0.0
-        self.velocity = 0.0
-        self.acceleration = 0.0
+        self.position = np.array([0.0, 0.0])
+        self.velocity = np.array([0.0, 0.0])
+        self.acceleration = np.array([0.0, 0.0])
 
         self.mass = 1.5
 
-        self.force = 0.0
+        self.force = np.array([0.0, 0.0])
         self.max_force = 100.0
 
-        self.target_position = 10.0
-        self.target_velocity = 0.0
+        self.target_position = np.array([5.0, 5.0])
+        self.target_velocity = np.array([0.0, 0.0])
 
-        self.state = np.array([0.0, 0.0])
-        self.target_state = np.array([10.0, 0.0])
+        self.state = np.array([0.0, 0.0, 0.0, 0.0])
+        self.target_state = np.array([5.0, 5.0, 0.0, 0.0])
 
         self.A = np.array([
-            [0.0, 1],
-            [0.0 , 0.0]
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0]
         ])
 
         self.B = np.array([
-            [0.0],
-            [1.0/self.mass]
+            [0.0, 0.0],
+            [0.0, 0.0],
+            [1.0/self.mass, 0.0],
+            [0.0, 1.0/self.mass]
         ])
 
         self.Q = np.array([
-            [10.0, 0],
-            [0, 3.0]
+            [10.0, 0.0, 0.0, 0.0],
+            [0.0, 10.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
         ])
 
         self.R = np.array([
-            [1.0]
+            [1.0, 0.0],
+            [0.0, 1.0]
         ])
 
         self.P = solve_continuous_are(
@@ -62,16 +69,22 @@ class helix_pid_controller_py_node(Node):
     def timer_callback(self):
 
         self.state = np.array([
-            self.position,
-            self.velocity
+            self.position[0],
+            self.position[1],
+            self.velocity[0],
+            self.velocity[1]
+        ])
+
+        self.target_state = np.array([
+            self.target_position[0],
+            self.target_position[1],
+            self.target_velocity[0],
+            self.target_velocity[1]
         ])
 
         self.error_state = self.state - self.target_state
 
-        self.force = -(self.K @ self.error_state).item()
-
-        if abs(self.force) > self.max_force:
-            self.force = np.sign(self.force) * self.max_force
+        self.force = -(self.K @ self.error_state)
 
 
         self.acceleration = self.force / self.mass
