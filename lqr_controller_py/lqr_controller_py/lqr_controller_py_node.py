@@ -18,11 +18,11 @@ class helix_pid_controller_py_node(Node):
         self.force = 0.0
         self.max_force = 100.0
 
-        self.target_position = 5.0
+        self.target_position = 10.0
         self.target_velocity = 0.0
 
         self.state = np.array([0.0, 0.0])
-        self.target_state = np.array([5.0, 0.0])
+        self.target_state = np.array([10.0, 0.0])
 
         self.A = np.array([
             [0.0, 1],
@@ -36,7 +36,7 @@ class helix_pid_controller_py_node(Node):
 
         self.Q = np.array([
             [10.0, 0],
-            [0, 1.0]
+            [0, 3.0]
         ])
 
         self.R = np.array([
