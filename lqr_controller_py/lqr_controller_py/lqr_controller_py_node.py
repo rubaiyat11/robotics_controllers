@@ -86,6 +86,16 @@ class helix_pid_controller_py_node(Node):
 
         self.force = -(self.K @ self.error_state)
 
+        self.Fx = self.force[0]
+        self.Fy = self.force[1]
+
+        if(abs(self.Fx) > self.max_force):
+            self.unit_vector = self.Fx / abs(self.Fx)
+            self.Fx = self.unit_vector * self.max_force
+        elif(abs(self.Fx) > self.max_force):
+            self.unit_vector = self.Fy / abs(self.Fy)
+            self.Fy = self.unit_vector / abs(self.Fy)
+
 
         self.acceleration = self.force / self.mass
         
