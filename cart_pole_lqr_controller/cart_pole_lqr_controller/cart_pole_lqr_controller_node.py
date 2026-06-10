@@ -10,9 +10,21 @@ class cart_pole_lqr_controller_node(Node):
         super().__init__("cart_pole_lqr_controller_node")
 
         self.x = 0.0
+        self.x_dot = 0.0
         self.angle = 0.0
-        self.state = np.array([self.x, self.angle])
-        self.target_state = np.array([10.0, 30.0])
+        self.angle_dot = 0.0
+        self.state = np.array([
+            self.x,
+            self.x_dot,
+            self.angle,
+            self.angle_dot
+            ])
+        self.target_state = np.array([
+            10.0,
+            0.0,
+            0.0,
+            0.0
+            ])
 
         self.m = 0.5
         self.M = 2.0
@@ -20,7 +32,7 @@ class cart_pole_lqr_controller_node(Node):
         self.length = 1.0
 
         self.force = np.array([0.0, 0.0])
-        self.max_force = 0.0
+        self.max_force = 100.0
 
         self.g = 9.8
 
@@ -46,8 +58,7 @@ class cart_pole_lqr_controller_node(Node):
         ])
 
         self.R = np.array([
-            [1],
-            [10]
+            [1]
         ])
 
         self.P = solve_continuous_are(
@@ -68,26 +79,21 @@ class cart_pole_lqr_controller_node(Node):
 
         self.error_state = self.state - self.target_state
 
-        self.force = -(self.K * self.error_state)
+        self.force = float(-(self.K @ self.error_state))
 
-        self.fx = self.force[1]
-        self.ftheta = self.force[3]
+        self.force = np.clip(
+            self.force,
+            -self.max_force,
+            self.max_force
+        )
 
-        if abs(self.fx) > self.max_force:
-            self.fx = self.max_force
-        elif abs(self.ftheta) > self.max_force:
-            self.ftheta = self.max_force
+        self.state_dot = self.A @ self.state + self.B.flatten() * self.force
 
-        self.force[1] = self.fx
-        self.force[3] = self.ftheta
+        self.state += self.state_dot * self.dt
 
-        self.acceleration += self.force/(self.m + self.M)
-
-        self.velocity += self.acceleration * self.dt
-
-        self.position += self.velocity * self.dt
-
-        self.get_logger().info(f"Position: {self.position} | Error: {self.error_state}")
+        self.get_logger().info(
+        f"State = {self.state}"
+    )
 
 
 
