@@ -5,9 +5,9 @@ from scipy.linalg import solve_continuous_are
 import numpy as np
 
 
-class helix_pid_controller_py_node(Node):
+class lqr_controller_py_node(Node):
     def __init__(self):
-        super().__init__("helix_pid_controller_py_node")
+        super().__init__("lqr_controller_py_node")
 
         self.position = np.array([0.0, 0.0])
         self.velocity = np.array([0.0, 0.0])
@@ -96,6 +96,8 @@ class helix_pid_controller_py_node(Node):
             self.unit_vector = self.Fy / abs(self.Fy)
             self.Fy = self.unit_vector / abs(self.Fy)
 
+        self.force[0] = self.Fx
+        self.force[1] = self.Fy
 
         self.acceleration = self.force / self.mass
         
@@ -110,7 +112,7 @@ class helix_pid_controller_py_node(Node):
         
 def main(args=None):
     rclpy.init(args=args)
-    node = helix_pid_controller_py_node()
+    node = lqr_controller_py_node()
     rclpy.spin(node)
     rclpy.shutdown()
 
