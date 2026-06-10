@@ -92,8 +92,8 @@ class cart_pole_lqr_controller_node(Node):
         self.state += self.state_dot * self.dt
 
         self.get_logger().info(
-        f"State = {self.state}"
-    )
+            f"State = {self.state}"
+        )
 
 
 
