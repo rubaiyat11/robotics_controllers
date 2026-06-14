@@ -13,8 +13,8 @@ public:
             0.0;
 
         target_state <<
-            5.0,
-            0.0;
+            10.0,
+            5.0;
 
         A <<
             0.0, 1.0,
@@ -25,13 +25,13 @@ public:
             1.0;
 
         Q <<
-            10.0, 0.0,
-            0.0, 1.0;
+            15.0, 0.0,
+            0.0, 3.0;
         
-        R = 0.1;
+        R = 0.5;
 
         dt = 0.1;
-        horizon = 10;
+        horizon = 15;
 
         timer = this->create_wall_timer(
             std::chrono::milliseconds(100),
